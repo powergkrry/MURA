@@ -1,0 +1,8 @@
+There are no psnr function in pytorch.
+So I will make my own psnr funtion with inherit Loss function in pytorch.
+
+psnr = -10*log10(MSE / S**2)
+S is the maximum pixel value.
+I saw someone write a function like psnr = -10*log10(MSE) in github
+I will find why people use that way.
+
