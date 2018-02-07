@@ -11,6 +11,9 @@ import time
 import folder2
 
 
+#torch.set_default_tensor_type('torch.HalfTensor')
+
+
 def img_to_tensorVariable(dir_path, name_list, num_img_from, num_img_to):
      img_list = []
 
@@ -40,8 +43,8 @@ def cal_test_error(test_file_num, BATCH_SIZE):
     for i in range(len(test_input_iter)):
         data_input, _ = test_input_iter.next()
         data_output, _ = test_output_iter.next()
-        data_input = data_input.type(torch.FloatTensor)
-        data_output = data_output.type(torch.FloatTensor)
+        data_input = data_input.type(torch.HalfTensor)
+        data_output = data_output.type(torch.HalfTensor)
 
         x = Variable(data_input.cuda())
         y = Variable(data_output.cuda())
@@ -286,8 +289,10 @@ for epoch in range(EPOCH):
     for step in range(len(train_input_iter)):
         data_input, _ = train_input_iter.next()
         data_output, _ = train_output_iter.next()
-        data_input = data_input.type(torch.FloatTensor)
-        data_output = data_output.type(torch.FloatTensor)
+        print(type(data_input))
+        data_input = data_input.type(torch.HalfTensor)
+        data_output = data_output.type(torch.HalfTensor)
+        print(type(data_input))
 
         x = Variable(data_input.cuda())
         y = Variable(data_output.cuda())
@@ -313,7 +318,7 @@ for epoch in range(EPOCH):
         plt.pause(0.05)
         """
     epoch_ = epoch + 0 + 1
-    save_name = './pretrained/kang04_epoch' + str(epoch_) + '.pth.tar'
+    save_name = './pretrained/kang05_epoch' + str(epoch_) + '.pth.tar'
     torch.save({'model':autoencoder.state_dict(),'state':optimizer.state_dict()}, save_name)
 #    scheduler.step()
     print("model saved")

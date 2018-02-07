@@ -59,13 +59,13 @@ LR2 = 0.0001
 N_TEST_IMG = 5
 test_error = []
 
-dir_input = '/hoem04/outofhome/MURA_TRAIN_RESIZE_NOISE/'
-dir_output = '/hoem04/outofhome/MURA_TRAIN_RESIZE/'
-dir_test_input = '/hoem04/outofhome/MURA_TEST_RESIZE_NOISE/'
-dir_test_output = '/hoem04/outofhome/MURA_TEST_RESIZE/'
-namelist_input = os.listdir('/hoem04/outofhome/MURA_TRAIN_RESIZE_NOISE/test/')
-namelist_output = os.listdir('/hoem04/outofhome/MURA_TRAIN_RESIZE/test/')
-namelist_test = os.listdir('/hoem04/outofhome/MURA_TEST_RESIZE_NOISE/test/')
+dir_input = '/home/powergkrry/MURA/MURA_TRAIN_RESIZE_NOISE/'
+dir_output = '/home/powergkrry/MURA/MURA_TRAIN_RESIZE/'
+dir_test_input = '/home/powergkrry/MURA/MURA_TEST_RESIZE_NOISE/'
+dir_test_output = '/home/powergkrry/MURA/MURA_TEST_RESIZE/'
+namelist_input = os.listdir('/home/powergkrry/MURA/MURA_TRAIN_RESIZE_NOISE/test/')
+namelist_output = os.listdir('/home/powergkrry/MURA/MURA_TRAIN_RESIZE/test/')
+namelist_test = os.listdir('/home/powergkrry/MURA/MURA_TEST_RESIZE_NOISE/test/')
 test_file_num = len(namelist_test)
 
 class AutoEncoder(nn.Module):
@@ -257,7 +257,7 @@ for i in range(N_TEST_IMG):
     a[1][i].imshow(view_data_out.data.cpu().numpy()[i].reshape(512,350), cmap='gray')
     a[1][i].set_xticks(())
     a[1][i].set_yticks(())
-
+"""
 
 for epoch in range(EPOCH):
     train_input_iter = iter(train_loader_input)
@@ -286,7 +286,7 @@ for epoch in range(EPOCH):
         optimizer.step()
 
         print("Epoch :", epoch, "| step :",step,"| train loss: %0.6f" % loss.data[0])
-        
+        """
         if step%100 != 0:
             continue
 
@@ -298,7 +298,7 @@ for epoch in range(EPOCH):
             a[2][i].set_yticks(())
         plt.draw()
         plt.pause(0.05)
-        
+        """
     epoch_ = epoch + 28 + 1
     save_name = './pretrained/kang03_epoch' + str(epoch_) + '.pth.tar'
     torch.save({'model':autoencoder.state_dict(),'state':optimizer.state_dict()}, save_name)
@@ -310,8 +310,8 @@ for epoch in range(EPOCH):
     print(test_error)
 
 
-"""
 
+"""
 # Plot Test Image
 test_input_iter = iter(test_loader_input)
 test_output_iter = iter(test_loader_output)
@@ -344,4 +344,4 @@ for i in range(len(test_input_iter)):
         a[2][i].set_xticks(())
         a[2][i].set_yticks(())
     plt.show()
-
+"""

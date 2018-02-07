@@ -62,13 +62,13 @@ LR2 = 0.0001
 N_TEST_IMG = 5
 test_error = []
 
-dir_input = '/home/MURA/MURA_TRAIN_RESIZE_NOISE/'
-dir_output = '/home/MURA/MURA_TRAIN_RESIZE/'
-dir_test_input = '/home/MURA/MURA_TEST_RESIZE_NOISE/'
-dir_test_output = '/home/MURA/MURA_TEST_RESIZE/'
-namelist_input = os.listdir('/home/MURA/MURA_TRAIN_RESIZE_NOISE/test/')
-namelist_output = os.listdir('/home/MURA/MURA_TRAIN_RESIZE/test/')
-namelist_test = os.listdir('/home/MURA/MURA_TEST_RESIZE_NOISE/test/')
+dir_input = '/home/powergkrry/MURA/MURA_TRAIN_RESIZE_NOISE/'
+dir_output = '/home/powergkrry/MURA/MURA_TRAIN_RESIZE/'
+dir_test_input = '/home/powergkrry/MURA/MURA_TEST_RESIZE_NOISE/'
+dir_test_output = '/home/powergkrry/MURA/MURA_TEST_RESIZE/'
+namelist_input = os.listdir('/home/powergkrry/MURA/MURA_TRAIN_RESIZE_NOISE/test/')
+namelist_output = os.listdir('/home/powergkrry/MURA/MURA_TRAIN_RESIZE/test/')
+namelist_test = os.listdir('/home/powergkrry/MURA/MURA_TEST_RESIZE_NOISE/test/')
 test_file_num = len(namelist_test)
 
 class AutoEncoder(nn.Module):
@@ -109,21 +109,25 @@ class AutoEncoder(nn.Module):
 #            nn.Sigmoid()
         )
         """
-        self.conv1 = nn.Conv2d(1, 50, 3, stride=1, padding=1)
-        self.bn1 = nn.BatchNorm2d(50)
+        self.conv1 = nn.Conv2d(1, 16, 3, stride=1, padding=1)
+        self.bn1 = nn.BatchNorm2d(16)
         self.r1 = nn.ReLU()
+
+        self.conv2 = nn.Conv2d(16, 100, 3, stride=1, padding=1)
+        self.bn2 = nn.BatchNorm2d(100)
+        self.r2 = nn.ReLU()
 
         self.maxpool1 = nn.MaxPool2d(2, stride=2, return_indices=True)
 
-        self.conv2 = nn.Conv2d(50, 16, 1, stride=1, padding=0)
-        self.bn2 = nn.BatchNorm2d(16)
-        self.r2 = nn.ReLU()
-        self.conv3 = nn.Conv2d(16, 16, 3, stride=1, padding=1)
-        self.bn3 = nn.BatchNorm2d(16)
+        self.conv3 = nn.Conv2d(100, 32, 1, stride=1, padding=0)
+        self.bn3 = nn.BatchNorm2d(32)
         self.r3 = nn.ReLU()
-        self.conv4 = nn.Conv2d(16, 50, 1, stride=1, padding=0)
-        self.bn4 = nn.BatchNorm2d(50)
+        self.conv4 = nn.Conv2d(32, 32, 3, stride=1, padding=1)
+        self.bn4 = nn.BatchNorm2d(32)
         self.r4 = nn.ReLU()
+        self.conv5 = nn.Conv2d(32, 100, 1, stride=1, padding=0)
+        self.bn5 = nn.BatchNorm2d(100)
+        self.r5 = nn.ReLU()
 
         self.maxpool2 = nn.MaxPool2d(2, stride=2, return_indices=True)
 
@@ -135,19 +139,23 @@ class AutoEncoder(nn.Module):
 
         self.maxunpool2 = nn.MaxUnpool2d(2, stride=2)
 
-        self.deconv4 = nn.ConvTranspose2d(50, 16, 1, padding=0)
-        self.bn5 = nn.BatchNorm2d(16)
-        self.r5 = nn.ReLU()
-        self.deconv3 = nn.ConvTranspose2d(16, 16, 3, padding=1)
-        self.bn6 = nn.BatchNorm2d(16)
+        self.deconv5 = nn.ConvTranspose2d(100, 32, 1, padding=0)
+        self.bn6 = nn.BatchNorm2d(32)
         self.r6 = nn.ReLU()
-        self.deconv2 = nn.ConvTranspose2d(16, 50, 1, padding=0)
-        self.bn7 = nn.BatchNorm2d(50)
+        self.deconv4 = nn.ConvTranspose2d(32, 32, 3, padding=1)
+        self.bn7 = nn.BatchNorm2d(32)
         self.r7 = nn.ReLU()
+        self.deconv3 = nn.ConvTranspose2d(32, 100, 1, padding=0)
+        self.bn8 = nn.BatchNorm2d(100)
+        self.r8 = nn.ReLU()
 
         self.maxunpool1 = nn.MaxUnpool2d(2, stride=2)
 
-        self.deconv1 = nn.ConvTranspose2d(50, 1, 3, padding=1)
+        self.deconv2 = nn.ConvTranspose2d(100, 16, 3, padding=1)
+        self.bn9 = nn.BatchNorm2d(16)
+        self.r9 = nn.ReLU()
+
+        self.deconv1 = nn.ConvTranspose2d(16, 1, 3, padding=1)
         
     """
     def forward(self, x):
@@ -157,13 +165,14 @@ class AutoEncoder(nn.Module):
     """
     def forward(self, x):
         out = self.r1(self.bn1(self.conv1(x)))
+        out = self.r2(self.bn2(self.conv2(out)))
 
         size1 = out.size()
         out, indices1 = self.maxpool1(out)
 
-        out = self.r2(self.bn2(self.conv2(out)))
         out = self.r3(self.bn3(self.conv3(out)))
         out = self.r4(self.bn4(self.conv4(out)))
+        out = self.r5(self.bn5(self.conv5(out)))
 
         size2 = out.size()
         out, indices2 = self.maxpool2(out)
@@ -175,12 +184,13 @@ class AutoEncoder(nn.Module):
 
         out = self.maxunpool2(out, indices2, size2)
 
-        out = self.r5(self.bn5(self.deconv4(out)))
-        out = self.r6(self.bn6(self.deconv3(out)))
-        out = self.r7(self.bn7(self.deconv2(out)))
+        out = self.r6(self.bn6(self.deconv5(out)))
+        out = self.r7(self.bn7(self.deconv4(out)))
+        out = self.r8(self.bn8(self.deconv3(out)))
 
         out = self.maxunpool1(out, indices1, size1)
 
+        out = self.r9(self.bn9(self.deconv2(out)))
         out = self.deconv1(out)
 
         return(out)
@@ -191,12 +201,12 @@ autoencoder = AutoEncoder()
 autoencoder.cuda()
 print(autoencoder)
 
-optimizer = torch.optim.Adam(autoencoder.parameters(), lr=LR1, weight_decay=1e-5)
+optimizer = torch.optim.Adam(autoencoder.parameters(), lr=LR2, weight_decay=1e-5)
 #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=14, gamma=0.1)
 
-#check = torch.load('./pretrained/kang04_epoch28.pth.tar')
-#autoencoder.load_state_dict(check['model'])
-#optimizer.load_state_dict(check['state'])
+check = torch.load('./pretrained/kang04_epoch17.pth.tar')
+autoencoder.load_state_dict(check['model'])
+optimizer.load_state_dict(check['state'])
 
 loss_func = nn.MSELoss()
 
@@ -302,7 +312,7 @@ for epoch in range(EPOCH):
         plt.draw()
         plt.pause(0.05)
         """
-    epoch_ = epoch + 0 + 1
+    epoch_ = epoch + 17 + 1
     save_name = './pretrained/kang04_epoch' + str(epoch_) + '.pth.tar'
     torch.save({'model':autoencoder.state_dict(),'state':optimizer.state_dict()}, save_name)
 #    scheduler.step()
