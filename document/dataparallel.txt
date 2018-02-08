@@ -1,4 +1,11 @@
+train a model with multi GPU
+
+< objective >
+
 There are two GPUs at server so I wanna use both GPUs in training.
+
+
+< trial >
 
 autoencoder = AutoEncoder()
 autoencoder = torch.nn.DataParallel(autoencoder, device_ids = [0, 1])
@@ -9,3 +16,6 @@ Second line of the above codes makes the model trained by multi-GPU.
 torch.cuda.manual_seed_all(1)
 
 This code is for setting seed for all GPUs.
+
+
+< conclusion >

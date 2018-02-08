@@ -1,3 +1,11 @@
+save and load a model trained by multi GPU
+
+< objective >
+Find a way to save and load a model trained by multi GPU
+
+
+< trial >
+
 Codes for saving and loading the model parameters are same between single-GPU and multi-GPUs model.
 
 torch.save(model.state_dict(), save_name_model)
@@ -5,3 +13,5 @@ torch.save(optimizer.state_dict(), save_name_optimizer)
 
 model.load_state_dict(torch.load('PATH.pth.tar'))
 optimizer.load_state_dict(torch.load('PATH.pth.tar'))
+
+< conclusion >
