@@ -1,5 +1,15 @@
+PSNR - loss measurement
+
+< objective > 
+
+We used loss function as MSE, but usually in image deblurring, people use PSNR to measure visibility.
+How can we use PSNR in our code? 
+
+
+< trial >
+
 There are no psnr function in pytorch.
-So I will make my own psnr funtion with inherit Loss function in pytorch.
+So I want to make my own psnr funtion with inherit Loss function in pytorch.
 
 psnr = -10*log10(MSE / S**2)
 S is the maximum pixel value.
@@ -17,3 +27,9 @@ So the psnr = -10*log10(MSE) might be correct.
 
 In the blog, people cannot recognize the difference of the two images if they has more than 30dB of psnr.
 So our goal is to make a model that gives image near that psnr.
+
+
+< conclusion >
+
+I wanted to use PSNR in gradient descent, but I cannot make my own function. (The source is not kind)
+So I will use MSE for gradient descent, and use PSNR for just measurement (loss) 

@@ -1,4 +1,4 @@
-Documanetation Kanghyun, Yeonjee
+Documentation Kanghyun, Yeonjee
 
 MURA
  : image size determination (2018.02.07. ~ )
