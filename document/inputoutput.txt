@@ -1,0 +1,17 @@
+general input output (state of art)
+
+< objective >
+
+We used gaussian noised images as input, and clean image as output.
+But is it effective to do denoising?
+
+< trial >
+
+In simple linear autoencoder code, that network uses clean image as both input and output.
+
+In Natural Image Denoising with Convolutional Networks (2008), they added noise.
+
+In Beyond a Gaussian Denoiser : Residual Learning of Deep CNN for Image Denoising (2017), the added different range of noise (Gaussian).
+And they set the patch size (?) as 50x50.
+
+< conclusion >
