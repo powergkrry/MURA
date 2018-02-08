@@ -66,7 +66,7 @@ np.random.seed(1)
 random.seed(1)
 
 EPOCH = 20 
-BATCH_SIZE = 8 
+BATCH_SIZE = 16
 LR1 = 0.001     # learning rate
 LR2 = 0.0001
 N_TEST_IMG = 5

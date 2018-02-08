@@ -1,0 +1,19 @@
+There are no psnr function in pytorch.
+So I will make my own psnr funtion with inherit Loss function in pytorch.
+
+psnr = -10*log10(MSE / S**2)
+S is the maximum pixel value.
+I saw someone write a function like psnr = -10*log10(MSE) in github
+I will find why people use that way.
+
+In pytorch, torch.nn.MSELoss function has size_average = True.
+If it is False, loss is summed for each minibatch.
+If it is True, loss is averaged for each minibatch. (so, the loss is per image)
+
+http://zockr.tistory.com/76
+In above blog, they says S is global maximum pixel value.
+So, it is 225, but in our code, we divided by 225, so S is 1.
+So the psnr = -10*log10(MSE) might be correct.
+
+In the blog, people cannot recognize the difference of the two images if they has more than 30dB of psnr.
+So our goal is to make a model that gives image near that psnr.
