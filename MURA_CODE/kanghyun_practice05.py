@@ -6,12 +6,11 @@ import numpy as np
 import os
 from PIL import Image
 import torchvision
+from torchvision import transforms
 from torchvision.transforms import ToTensor, ToPILImage
 import time
 import folder2
-
-
-#torch.set_default_tensor_type('torch.HalfTensor')
+import random
 
 
 def img_to_tensorVariable(dir_path, name_list, num_img_from, num_img_to):
@@ -43,8 +42,8 @@ def cal_test_error(test_file_num, BATCH_SIZE):
     for i in range(len(test_input_iter)):
         data_input, _ = test_input_iter.next()
         data_output, _ = test_output_iter.next()
-        data_input = data_input.type(torch.HalfTensor)
-        data_output = data_output.type(torch.HalfTensor)
+        data_input = data_input.type(torch.FloatTensor)
+        data_output = data_output.type(torch.FloatTensor)
 
         x = Variable(data_input.cuda())
         y = Variable(data_output.cuda())
@@ -57,10 +56,18 @@ def cal_test_error(test_file_num, BATCH_SIZE):
     return test_error_output
 
 
+#trans_comp = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0, ), (1, ))])
+trans_comp = transforms.ToTensor()
+
 torch.manual_seed(1)    # reproducible
+torch.cuda.manual_seed_all(1) # for multi gpu
+#torch.backends.cudnn.enabled = False
+np.random.seed(1)
+random.seed(1)
+
 EPOCH = 20 
-BATCH_SIZE = 16 
-LR1 = 0.01     # learning rate
+BATCH_SIZE = 8 
+LR1 = 0.001     # learning rate
 LR2 = 0.0001
 N_TEST_IMG = 5
 test_error = []
@@ -112,27 +119,37 @@ class AutoEncoder(nn.Module):
 #            nn.Sigmoid()
         )
         """
-        self.conv1 = nn.Conv2d(1, 16, 3, stride=1, padding=1)
-        self.bn1 = nn.BatchNorm2d(16)
+        self.conv1 = nn.Conv2d(1, 64, 3, stride=1, padding=1)
+        self.bn1 = nn.BatchNorm2d(64)
         self.r1 = nn.ReLU()
 
-        self.conv2 = nn.Conv2d(16, 100, 3, stride=1, padding=1)
-        self.bn2 = nn.BatchNorm2d(100)
+        self.conv2 = nn.Conv2d(64, 64, 3, stride=1, padding=1)
+        self.bn2 = nn.BatchNorm2d(64)
         self.r2 = nn.ReLU()
 
         self.maxpool1 = nn.MaxPool2d(2, stride=2, return_indices=True)
 
-        self.conv3 = nn.Conv2d(100, 32, 1, stride=1, padding=0)
-        self.bn3 = nn.BatchNorm2d(32)
+        self.conv3 = nn.Conv2d(64, 128, 3, stride=1, padding=1)
+        self.bn3 = nn.BatchNorm2d(128)
         self.r3 = nn.ReLU()
-        self.conv4 = nn.Conv2d(32, 32, 3, stride=1, padding=1)
-        self.bn4 = nn.BatchNorm2d(32)
+
+        self.conv4 = nn.Conv2d(128, 128, 3, stride=1, padding=1)
+        self.bn4 = nn.BatchNorm2d(128)
         self.r4 = nn.ReLU()
-        self.conv5 = nn.Conv2d(32, 100, 1, stride=1, padding=0)
-        self.bn5 = nn.BatchNorm2d(100)
-        self.r5 = nn.ReLU()
 
         self.maxpool2 = nn.MaxPool2d(2, stride=2, return_indices=True)
+
+        self.conv5 = nn.Conv2d(128, 32, 1, stride=1, padding=0)
+        self.bn5 = nn.BatchNorm2d(32)
+        self.r5 = nn.ReLU()
+        self.conv6 = nn.Conv2d(32, 32, 3, stride=1, padding=1)
+        self.bn6 = nn.BatchNorm2d(32)
+        self.r6 = nn.ReLU()
+        self.conv7 = nn.Conv2d(32, 128, 1, stride=1, padding=0)
+        self.bn7 = nn.BatchNorm2d(128)
+        self.r7 = nn.ReLU()
+
+#        self.maxpool2 = nn.MaxPool2d(2, stride=2, return_indices=True)
 
 #        self.linear1 = nn.Linear(50*128*87, 80)
 #        self.bn4 = nn.BatchNorm2d(80)
@@ -140,25 +157,35 @@ class AutoEncoder(nn.Module):
 #        self.linear2 = nn.Linear(80, 50*128*87)
 #        self.r5 = nn.ReLU()
 
+#        self.maxunpool2 = nn.MaxUnpool2d(2, stride=2)
+
+        self.deconv7 = nn.ConvTranspose2d(128, 32, 1, padding=0)
+        self.bn8 = nn.BatchNorm2d(32)
+        self.r8 = nn.ReLU()
+        self.deconv6 = nn.ConvTranspose2d(32, 32, 3, padding=1)
+        self.bn9 = nn.BatchNorm2d(32)
+        self.r9 = nn.ReLU()
+        self.deconv5 = nn.ConvTranspose2d(32, 128, 1, padding=0)
+        self.bn10 = nn.BatchNorm2d(128)
+        self.r10 = nn.ReLU()
+
         self.maxunpool2 = nn.MaxUnpool2d(2, stride=2)
 
-        self.deconv5 = nn.ConvTranspose2d(100, 32, 1, padding=0)
-        self.bn6 = nn.BatchNorm2d(32)
-        self.r6 = nn.ReLU()
-        self.deconv4 = nn.ConvTranspose2d(32, 32, 3, padding=1)
-        self.bn7 = nn.BatchNorm2d(32)
-        self.r7 = nn.ReLU()
-        self.deconv3 = nn.ConvTranspose2d(32, 100, 1, padding=0)
-        self.bn8 = nn.BatchNorm2d(100)
-        self.r8 = nn.ReLU()
+        self.deconv4 = nn.ConvTranspose2d(128, 128, 3, padding=1)
+        self.bn11 = nn.BatchNorm2d(128)
+        self.r11 = nn.ReLU()
+
+        self.deconv3 = nn.ConvTranspose2d(128, 64, 3, padding=1)
+        self.bn12 = nn.BatchNorm2d(64)
+        self.r12 = nn.ReLU()
 
         self.maxunpool1 = nn.MaxUnpool2d(2, stride=2)
 
-        self.deconv2 = nn.ConvTranspose2d(100, 16, 3, padding=1)
-        self.bn9 = nn.BatchNorm2d(16)
-        self.r9 = nn.ReLU()
+        self.deconv2 = nn.ConvTranspose2d(64, 64, 3, padding=1)
+        self.bn13 = nn.BatchNorm2d(64)
+        self.r13 = nn.ReLU()
 
-        self.deconv1 = nn.ConvTranspose2d(16, 1, 3, padding=1)
+        self.deconv1 = nn.ConvTranspose2d(64, 1, 3, padding=1)
         
     """
     def forward(self, x):
@@ -175,25 +202,31 @@ class AutoEncoder(nn.Module):
 
         out = self.r3(self.bn3(self.conv3(out)))
         out = self.r4(self.bn4(self.conv4(out)))
-        out = self.r5(self.bn5(self.conv5(out)))
 
         size2 = out.size()
         out, indices2 = self.maxpool2(out)
+
+        out = self.r5(self.bn5(self.conv5(out)))
+        out = self.r6(self.bn6(self.conv6(out)))
+        out = self.r7(self.bn7(self.conv7(out)))
 
 #        out = out.view(out.size()[0], -1)
 #        out = self.r4(self.bn4(self.linear1(out)))
 #        out = self.r5(self.linear2(out))
 #        out = out.view(-1, 50, 128, 87)
 
+        out = self.r8(self.bn8(self.deconv7(out)))
+        out = self.r9(self.bn9(self.deconv6(out)))
+        out = self.r10(self.bn10(self.deconv5(out)))
+
         out = self.maxunpool2(out, indices2, size2)
 
-        out = self.r6(self.bn6(self.deconv5(out)))
-        out = self.r7(self.bn7(self.deconv4(out)))
-        out = self.r8(self.bn8(self.deconv3(out)))
+        out = self.r11(self.bn11(self.deconv4(out)))
+        out = self.r12(self.bn12(self.deconv3(out)))
 
         out = self.maxunpool1(out, indices1, size1)
 
-        out = self.r9(self.bn9(self.deconv2(out)))
+        out = self.r13(self.bn13(self.deconv2(out)))
         out = self.deconv1(out)
 
         return(out)
@@ -201,15 +234,34 @@ class AutoEncoder(nn.Module):
 
 print("generating autoencoder")
 autoencoder = AutoEncoder()
+autoencoder = torch.nn.DataParallel(autoencoder, device_ids = [0, 1])
 autoencoder.cuda()
-print(autoencoder)
 
 optimizer = torch.optim.Adam(autoencoder.parameters(), lr=LR1, weight_decay=1e-5)
 #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=14, gamma=0.1)
 
-#check = torch.load('./pretrained/kang04_epoch28.pth.tar')
+#autoencoder = torch.load('./pretrained/kang05_epoch2_model.pth.tar')
+#optimizer = torch.load('./pretrained/kang05_epoch2_optimizer.pth.tar')
+#do i need this?
+##autoencoder.load_state_dict(torch.load('./pretrained/kang05_epoch12_model.pth.tar'))
+##optimizer.load_state_dict(torch.load('./pretrained/kang05_epoch12_optimizer.pth.tar'))
+"""
+# original saved file with DataParallel
+model_state_dict = torch.load('./pretrained/kang05_epoch1_model.pth.tar')
+autoencoder.load_state_dict(model_state_dict)
+# create new OrderedDict that does not contain `module.`
+from collections import OrderedDict
+new_state_dict = OrderedDict()
+for k, v in model_state_dict.items():
+    name = k[7:] # remove `module.`
+    new_state_dict[name] = v
+# load params
+autoencoder.load_state_dict(new_state_dict)
+"""
+#check = torch.load('./pretrained/kang04_epoch17.pth.tar')
 #autoencoder.load_state_dict(check['model'])
 #optimizer.load_state_dict(check['state'])
+#autoencoder.eval()
 
 loss_func = nn.MSELoss()
 
@@ -226,7 +278,7 @@ print("loading complete")
 print("loading train_loader")
 folder_input = folder2.ImageFolder(
     root = dir_input,
-    transform = ToTensor(),
+    transform = trans_comp,
     loader = folder2.pil_loader
 )
 train_loader_input = torch.utils.data.DataLoader(
@@ -234,7 +286,7 @@ train_loader_input = torch.utils.data.DataLoader(
 
 folder_output = folder2.ImageFolder(
     root = dir_output,
-    transform = ToTensor(),
+    transform = trans_comp,
     loader = folder2.pil_loader
 )
 train_loader_output = torch.utils.data.DataLoader(
@@ -244,7 +296,7 @@ print("loading complete")
 print("loading test_loader")
 folder_test_input = folder2.ImageFolder(
     root = dir_test_input,
-    transform = ToTensor(),
+    transform = trans_comp,
     loader = folder2.pil_loader
 )
 test_loader_input = torch.utils.data.DataLoader(
@@ -252,7 +304,7 @@ test_loader_input = torch.utils.data.DataLoader(
 
 folder_test_output = folder2.ImageFolder(
     root = dir_test_output,
-    transform = ToTensor(),
+    transform = trans_comp,
     loader = folder2.pil_loader
 )
 test_loader_output = torch.utils.data.DataLoader(
@@ -263,8 +315,8 @@ print("loading complete")
 #print("--- %s seconds ---" %(time.time() - start_time))
 
 """
-f, a = plt.subplots(3, N_TEST_IMG, figsize=(5,3))
-plt.ion()
+f, a = plt.subplots(2, N_TEST_IMG, figsize=(5,3))
+#plt.ion()
 
 for i in range(N_TEST_IMG):
     a[0][i].imshow(view_data_in.data.cpu().numpy()[i].reshape(512, 350), cmap='gray')
@@ -273,8 +325,8 @@ for i in range(N_TEST_IMG):
     a[1][i].imshow(view_data_out.data.cpu().numpy()[i].reshape(512,350), cmap='gray')
     a[1][i].set_xticks(())
     a[1][i].set_yticks(())
+plt.show()
 """
-
 for epoch in range(EPOCH):
     train_input_iter = iter(train_loader_input)
     train_output_iter = iter(train_loader_output)
@@ -283,27 +335,26 @@ for epoch in range(EPOCH):
         print("different number of picture")
         break
 
-#    if epoch == 14:
-#        optimizer = torch.optim.Adam(autoencoder.parameters(), lr=LR2, weight_decay=1e-5)
-
     for step in range(len(train_input_iter)):
         data_input, _ = train_input_iter.next()
         data_output, _ = train_output_iter.next()
-        print(type(data_input))
-        data_input = data_input.type(torch.HalfTensor)
-        data_output = data_output.type(torch.HalfTensor)
-        print(type(data_input))
+        data_input = data_input.type(torch.FloatTensor)
+        data_output = data_output.type(torch.FloatTensor)
 
         x = Variable(data_input.cuda())
         y = Variable(data_output.cuda())
         decoded = autoencoder(x) # delete encoded,
 
         loss = loss_func(decoded, y)
+#        print("Epoch :", epoch, "| step :",step,"| train loss: %0.6f" % loss.data[0])
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        print("Epoch :", epoch, "| step :",step,"| train loss: %0.6f" % loss.data[0])
+        if step % 100 == 0:
+#            break
+            print("Epoch :", epoch, "| step :",step,"| train loss: %0.6f" % loss.data[0])
+            
         """
         if step%100 != 0:
             continue
@@ -317,9 +368,14 @@ for epoch in range(EPOCH):
         plt.draw()
         plt.pause(0.05)
         """
+    
     epoch_ = epoch + 0 + 1
-    save_name = './pretrained/kang05_epoch' + str(epoch_) + '.pth.tar'
-    torch.save({'model':autoencoder.state_dict(),'state':optimizer.state_dict()}, save_name)
+    save_name_model = './pretrained/kang05_epoch' + str(epoch_) + '_model' + '.pth.tar'
+    save_name_optimizer = './pretrained/kang05_epoch' + str(epoch_) + '_optimizer' + '.pth.tar'
+    torch.save(autoencoder.state_dict(), save_name_model)
+#    torch.save(autoencoder.module.state_dict(), save_name_model)
+    torch.save(optimizer.state_dict(), save_name_optimizer)
+#    torch.save(autoencoder, save_name_model)
 #    scheduler.step()
     print("model saved")
     
@@ -329,7 +385,6 @@ for epoch in range(EPOCH):
 
 
 """
-
 # Plot Test Image
 test_input_iter = iter(test_loader_input)
 test_output_iter = iter(test_loader_output)

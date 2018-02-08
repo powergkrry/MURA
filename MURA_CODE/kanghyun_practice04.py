@@ -198,15 +198,29 @@ class AutoEncoder(nn.Module):
 
 print("generating autoencoder")
 autoencoder = AutoEncoder()
+autoencoder = torch.nn.DataParallel(autoencoder, device_ids = [0, 1])
 autoencoder.cuda()
 print(autoencoder)
 
 optimizer = torch.optim.Adam(autoencoder.parameters(), lr=LR2, weight_decay=1e-5)
 #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=14, gamma=0.1)
 
+"""
+# original saved file with DataParallel
 check = torch.load('./pretrained/kang04_epoch17.pth.tar')
-autoencoder.load_state_dict(check['model'])
-optimizer.load_state_dict(check['state'])
+state_dict = check['model']
+# create new OrderedDict that does not contain `module.`
+from collections import OrderedDict
+new_state_dict = OrderedDict()
+for k, v in state_dict.items():
+    name = k[7:] # remove `module.`
+    new_state_dict[name] = v
+# load params
+autoencoder.load_state_dict(new_state_dict)
+"""
+#check = torch.load('./pretrained/kang04_epoch17.pth.tar')
+#autoencoder.load_state_dict(check['model'])
+#optimizer.load_state_dict(check['state'])
 
 loss_func = nn.MSELoss()
 
