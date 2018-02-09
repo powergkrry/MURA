@@ -72,7 +72,7 @@ def cal_test_mse_psnr(test_file_num, BATCH_SIZE):
 
 
 trans_comp = transforms.Compose([
-        transforms.CenterCrop(100),
+        transforms.CenterCrop(50),
         transforms.ToTensor()
     ])
 
@@ -171,7 +171,7 @@ class AutoEncoder(nn.Module):
  
 print("generating autoencoder")
 autoencoder = AutoEncoder()
-autoencoder = torch.nn.DataParallel(autoencoder, device_ids = [0])
+autoencoder = torch.nn.DataParallel(autoencoder, device_ids = [0, 1])
 autoencoder.cuda()
 
 optimizer = torch.optim.Adam(autoencoder.parameters(), lr=LR1, weight_decay=1e-5)
@@ -218,7 +218,7 @@ folder_test_input = folder2.ImageFolder(
     loader = folder2.pil_loader
 )
 test_loader_input = torch.utils.data.DataLoader(
-    folder_test_input, batch_size = 8, shuffle = False)
+    folder_test_input, batch_size = 2, shuffle = False)
 
 folder_test_output = folder2.ImageFolder(
     root = dir_test_output,
@@ -226,7 +226,7 @@ folder_test_output = folder2.ImageFolder(
     loader = folder2.pil_loader
 )
 test_loader_output = torch.utils.data.DataLoader(
-    folder_test_output, batch_size = 8, shuffle = False)
+    folder_test_output, batch_size = 2, shuffle = False)
 print("loading complete")
 
 """
@@ -273,7 +273,7 @@ for epoch in range(EPOCH):
 
 #        if True:
         if step % 400 == 0:
-#            break
+            break
             print("Epoch :", epoch, "| step :",step,"| train loss: %0.6f" % loss.data[0])
             """
             decoded_data = autoencoder(view_data_in)
@@ -296,7 +296,7 @@ for epoch in range(EPOCH):
     print("model saved")
     
     train_error.append(train_loss_sum * BATCH_SIZE / train_file_num) # approximate
-    test_loss_output, test_avg_psnr_output = cal_test_mse_psnr(test_file_num, 8)
+    test_loss_output, test_avg_psnr_output = cal_test_mse_psnr(test_file_num, 2)
     test_error.append(test_loss_output)
     test_psnr.append(test_avg_psnr_output)
 
