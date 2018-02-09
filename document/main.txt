@@ -1,11 +1,10 @@
 Documentation Kanghyun, Yeonjee
 
 MURA
- : image size determination (2018.02.07. ~ )
  : image normalization (2018.02.07. ~ )
- : Dongwha paper (2018.02.07 ~ )
-inputoutput : general input output (state of art) (2018.02.07. ~ )
+ : Dongwha paper (2018.02.07. ~ )
 
-dataparallel : train a model with multi GPU (2018.02.07 ~ 2018.02.08)
-modelsaveload : save and load a model trained by multi GPU (2018.02.07 ~ 2018.02.08)
-psnr : PSNR - loss measurement (2018.02.07 ~ 2018.02.08)
+inputoutput : general input output (state of art) (2018.02.07. ~ 2018.02.09.)
+dataparallel : train a model with multi GPU (2018.02.07. ~ 2018.02.08.)
+modelsaveload : save and load a model trained by multi GPU (2018.02.07. ~ 2018.02.08.)
+psnr : PSNR - loss measurement (2018.02.07. ~ 2018.02.08.)

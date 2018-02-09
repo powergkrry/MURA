@@ -12,6 +12,14 @@ In simple linear autoencoder code, that network uses clean image as both input a
 In Natural Image Denoising with Convolutional Networks (2008), they added noise.
 
 In Beyond a Gaussian Denoiser : Residual Learning of Deep CNN for Image Denoising (2017), the added different range of noise (Gaussian).
-And they set the patch size (?) as 50x50.
+And they set the patch size as 50x50. (I think this means they cropped images with size 50x50)
 
 < conclusion >
+
+We will use input and output as below.
+input : crop image as 1/4  size, add gaussian noise with various sigma
+output : crop image as 1/4 size, clean images
+
+We will train the network with input and noise = input-output.
+
+Since we only use convolutions, there are no problem in predicting different size of images.
