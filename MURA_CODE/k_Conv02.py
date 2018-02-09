@@ -179,8 +179,8 @@ optimizer = torch.optim.Adam(autoencoder.parameters(), lr=LR1, weight_decay=1e-5
 
 """
 # load pretrained weight, optimizer
-autoencoder.load_state_dict(torch.load('./pretrained/k_Conv01_epoch10_model.pth.tar'))
-optimizer.load_state_dict(torch.load('./pretrained/k_Conv01_epoch10_optimizer.pth.tar'))
+autoencoder.load_state_dict(torch.load('./pretrained/k_Conv02_epoch10_model.pth.tar'))
+optimizer.load_state_dict(torch.load('./pretrained/k_Conv02_epoch10_optimizer.pth.tar'))
 """
 loss_func = nn.MSELoss()
 
@@ -273,7 +273,7 @@ for epoch in range(EPOCH):
 
 #        if True:
         if step % 400 == 0:
-            break
+#            break
             print("Epoch :", epoch, "| step :",step,"| train loss: %0.6f" % loss.data[0])
             """
             decoded_data = autoencoder(view_data_in)
@@ -288,8 +288,8 @@ for epoch in range(EPOCH):
     epoch_ = epoch + 0 + 1
 
 # save data
-    save_name_model = './pretrained/k_Conv01_epoch' + str(epoch_) + '_model' + '.pth.tar'
-    save_name_optimizer = './pretrained/k_Conv01_epoch' + str(epoch_) + '_optimizer' + '.pth.tar'
+    save_name_model = './pretrained/k_Conv02_epoch' + str(epoch_) + '_model' + '.pth.tar'
+    save_name_optimizer = './pretrained/k_Conv02_epoch' + str(epoch_) + '_optimizer' + '.pth.tar'
     torch.save(autoencoder.state_dict(), save_name_model)
     torch.save(optimizer.state_dict(), save_name_optimizer)
 #    scheduler.step()

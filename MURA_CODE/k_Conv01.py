@@ -273,7 +273,7 @@ for epoch in range(EPOCH):
 
 #        if True:
         if step % 400 == 0:
-            break
+#            break
             print("Epoch :", epoch, "| step :",step,"| train loss: %0.6f" % loss.data[0])
             """
             decoded_data = autoencoder(view_data_in)
