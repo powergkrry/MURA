@@ -109,33 +109,33 @@ class AutoEncoder(nn.Module):
         self.conv1 = nn.Conv2d(1, 64, 3, stride=1, padding=1)
         self.conv2 = nn.Sequential(
                      nn.Conv2d(64, 16, 1, stride=1, padding=0),
-                     nn.BatchNorm2d(16),
-                     nn.ReLU(),
+                    # nn.BatchNorm2d(16),
+                    # nn.ReLU(),
                      nn.Conv2d(16, 16, 3, stride=1, padding=1),
-                     nn.BatchNorm2d(16),
-                     nn.ReLU(),
+                    # nn.BatchNorm2d(16),
+                    # nn.ReLU(),
                      nn.Conv2d(16, 64, 1, stride=1, padding=0),
                      nn.BatchNorm2d(64),
                      nn.ReLU())
         self.conv3 = nn.Conv2d(64, 128, 3, stride=1, padding=1)
         self.conv4 = nn.Sequential(
                      nn.Conv2d(128, 32, 1, stride=1, padding=0),
-                     nn.BatchNorm2d(32),
-                     nn.ReLU(),
+                    # nn.BatchNorm2d(32),
+                    # nn.ReLU(),
                      nn.Conv2d(32, 32, 3, stride=1, padding=1),
-                     nn.BatchNorm2d(32),
-                     nn.ReLU(),
+                    # nn.BatchNorm2d(32),
+                    # nn.ReLU(),
                      nn.Conv2d(32, 128, 1, stride=1, padding=0),
                      nn.BatchNorm2d(128),
                      nn.ReLU())
         self.conv5 = nn.Conv2d(128, 256, 3, stride=1, padding=1)
         self.conv6 = nn.Sequential(
                      nn.Conv2d(256, 64, 1, stride=1, padding=0),
-                     nn.BatchNorm2d(64),
-                     nn.ReLU(),
+                    # nn.BatchNorm2d(64),
+                    # nn.ReLU(),
                      nn.Conv2d(64, 64, 3, stride=1, padding=1),
-                     nn.BatchNorm2d(64),
-                     nn.ReLU(),
+                    # nn.BatchNorm2d(64),
+                    # nn.ReLU(),
                      nn.Conv2d(64, 256, 1, stride=1, padding=0),
                      nn.BatchNorm2d(256),
                      nn.ReLU())
