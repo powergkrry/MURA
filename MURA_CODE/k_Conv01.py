@@ -107,26 +107,71 @@ class AutoEncoder(nn.Module):
         super(AutoEncoder, self).__init__()
         
         self.conv1 = nn.Conv2d(1, 64, 3, stride=1, padding=1)
-        self.bn1 = nn.BatchNorm2d(64)
-        self.conv2 = nn.Conv2d(64, 64, 3, stride=1, padding=1)
-        self.conv3 = nn.Conv2d(64, 1, 3, stride=1, padding=1)
+        self.conv2 = nn.Sequential(
+                     nn.Conv2d(64, 16, 1, stride=1, padding=0),
+                     nn.BatchNorm2d(16),
+                     nn.ReLU(),
+                     nn.Conv2d(16, 16, 3, stride=1, padding=1),
+                     nn.BatchNorm2d(16),
+                     nn.ReLU(),
+                     nn.Conv2d(16, 64, 1, stride=1, padding=0),
+                     nn.BatchNorm2d(64),
+                     nn.ReLU())
+        self.conv3 = nn.Conv2d(64, 128, 3, stride=1, padding=1)
+        self.conv4 = nn.Sequential(
+                     nn.Conv2d(128, 32, 1, stride=1, padding=0),
+                     nn.BatchNorm2d(32),
+                     nn.ReLU(),
+                     nn.Conv2d(32, 32, 3, stride=1, padding=1),
+                     nn.BatchNorm2d(32),
+                     nn.ReLU(),
+                     nn.Conv2d(32, 128, 1, stride=1, padding=0),
+                     nn.BatchNorm2d(128),
+                     nn.ReLU())
+        self.conv5 = nn.Conv2d(128, 256, 3, stride=1, padding=1)
+        self.conv6 = nn.Sequential(
+                     nn.Conv2d(256, 64, 1, stride=1, padding=0),
+                     nn.BatchNorm2d(64),
+                     nn.ReLU(),
+                     nn.Conv2d(64, 64, 3, stride=1, padding=1),
+                     nn.BatchNorm2d(64),
+                     nn.ReLU(),
+                     nn.Conv2d(64, 256, 1, stride=1, padding=0),
+                     nn.BatchNorm2d(256),
+                     nn.ReLU())
+        self.conv7 = nn.Conv2d(256, 128, 3, stride=1, padding=1)
+        self.conv8 = nn.Conv2d(128, 64, 3, stride=1, padding=1)
+        self.conv9 = nn.Conv2d(64, 1, 3, stride=1, padding=1)
+
+        self.bn1 = nn.BatchNorm2d(16)
+        self.bn2 = nn.BatchNorm2d(32)
+        self.bn3 = nn.BatchNorm2d(64)
+        self.bn4 = nn.BatchNorm2d(128)
+        self.bn5 = nn.BatchNorm2d(256)
+
         self.ReLU = nn.ReLU()
 
     def forward(self, x):
-        x = self.ReLU(self.conv1(x))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.conv3(x)
+        x = self.ReLU(self.bn3(self.conv1(x))) # 1-64
+        x = self.conv2(x) # 64-64
+        x = self.ReLU(self.bn4(self.conv3(x))) # 64-128
+        x = self.conv4(x) # 128-128
+        x = self.conv4(x) # 128-128
+        x = self.ReLU(self.bn5(self.conv5(x))) # 128-256
+        x = self.conv6(x) # 256-256
+        x = self.conv6(x) # 256-256
+        x = self.ReLU(self.bn4(self.conv7(x))) # 256-128
+        x = self.conv4(x) # 128-128
+        x = self.conv4(x) # 128-128
+        x = self.ReLU(self.bn3(self.conv8(x))) # 128-64
+        x = self.conv2(x) # 64-64
+        x = self.conv9(x)
         return x
 
  
 print("generating autoencoder")
 autoencoder = AutoEncoder()
-#autoencoder = torch.nn.DataParallel(autoencoder, device_ids = [0, 1])
+autoencoder = torch.nn.DataParallel(autoencoder, device_ids = [0, 1])
 autoencoder.cuda()
 
 optimizer = torch.optim.Adam(autoencoder.parameters(), lr=LR1, weight_decay=1e-5)
@@ -134,8 +179,8 @@ optimizer = torch.optim.Adam(autoencoder.parameters(), lr=LR1, weight_decay=1e-5
 
 """
 # load pretrained weight, optimizer
-autoencoder.load_state_dict(torch.load('./pretrained/y_Conv02_epoch10_model.pth.tar'))
-optimizer.load_state_dict(torch.load('./pretrained/y_Conv02_epoch10_optimizer.pth.tar'))
+autoencoder.load_state_dict(torch.load('./pretrained/k_Conv01_epoch10_model.pth.tar'))
+optimizer.load_state_dict(torch.load('./pretrained/k_Conv01_epoch10_optimizer.pth.tar'))
 """
 loss_func = nn.MSELoss()
 
@@ -184,7 +229,7 @@ test_loader_output = torch.utils.data.DataLoader(
     folder_test_output, batch_size = 8, shuffle = False)
 print("loading complete")
 
-
+"""
 # show image
 f, a = plt.subplots(3, N_TEST_IMG, figsize=(5,3))
 plt.ion()
@@ -193,10 +238,10 @@ for i in range(N_TEST_IMG):
     a[0][i].imshow(view_data_in.data.cpu().numpy()[i].reshape(512, 350), cmap='gray')
     a[0][i].set_xticks(()) 
     a[0][i].set_yticks(())
-    a[1][i].imshow(view_data_out.data.cpu().numpy()[i].reshape(512,350), cmap='gray')
+    a[1][i].imshow(view_data_out.data.cpu().numpy()[i].reshape(512, 350), cmap='gray')
     a[1][i].set_xticks(())
     a[1][i].set_yticks(())
-
+"""
 for epoch in range(EPOCH):
     train_input_iter = iter(train_loader_input)
     train_output_iter = iter(train_loader_output)
@@ -230,7 +275,7 @@ for epoch in range(EPOCH):
         if step % 400 == 0:
 #            break
             print("Epoch :", epoch, "| step :",step,"| train loss: %0.6f" % loss.data[0])
-            
+            """
             decoded_data = autoencoder(view_data_in)
             for i in range(N_TEST_IMG):
                 a[2][i].clear()
@@ -239,14 +284,12 @@ for epoch in range(EPOCH):
                 a[2][i].set_yticks(())
             plt.draw()
             plt.pause(0.05)
-
-        #aaa = input("Press ctrl+c:")
-        
+            """
     epoch_ = epoch + 0 + 1
 
 # save data
-    save_name_model = './pretrained/y_Conv02_epoch' + str(epoch_) + '_model' + '.pth.tar'
-    save_name_optimizer = './pretrained/y_Conv02_epoch' + str(epoch_) + '_optimizer' + '.pth.tar'
+    save_name_model = './pretrained/k_Conv01_epoch' + str(epoch_) + '_model' + '.pth.tar'
+    save_name_optimizer = './pretrained/k_Conv01_epoch' + str(epoch_) + '_optimizer' + '.pth.tar'
     torch.save(autoencoder.state_dict(), save_name_model)
     torch.save(optimizer.state_dict(), save_name_optimizer)
 #    scheduler.step()
