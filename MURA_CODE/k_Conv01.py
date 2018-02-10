@@ -84,9 +84,10 @@ random.seed(1)
 
 EPOCH = 20 
 BATCH_SIZE = 16
-LR1 = 0.001     # learning rate
-LR2 = 0.0001
-LR3 = 0.00001
+LR1 = 0.01     # learning rate
+LR2 = 0.001
+LR3 = 0.0001
+LR4 = 0.00001
 N_TEST_IMG = 5
 train_error = []
 test_error = []
