@@ -178,13 +178,13 @@ autoencoder = AutoEncoder()
 autoencoder = torch.nn.DataParallel(autoencoder, device_ids = [0, 1])
 autoencoder.cuda()
 
-optimizer = torch.optim.Adam(autoencoder.parameters(), lr=LR2, weight_decay=1e-5)
+optimizer = torch.optim.Adam(autoencoder.parameters(), lr=LR3, weight_decay=1e-5)
 #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=14, gamma=0.1)
 
 """
 # load pretrained weight, optimizer
-autoencoder.load_state_dict(torch.load('./pretrained/k_Conv04_epoch10_model.pth.tar'))
-optimizer.load_state_dict(torch.load('./pretrained/k_Conv04_epoch10_optimizer.pth.tar'))
+autoencoder.load_state_dict(torch.load('./pretrained/k_Conv05_epoch10_model.pth.tar'))
+optimizer.load_state_dict(torch.load('./pretrained/k_Conv05_epoch10_optimizer.pth.tar'))
 """
 loss_func = nn.MSELoss()
 
@@ -292,8 +292,8 @@ for epoch in range(EPOCH):
     epoch_ = epoch + 0 + 1
 
 # save data
-    save_name_model = './pretrained/k_Conv04_epoch' + str(epoch_) + '_model' + '.pth.tar'
-    save_name_optimizer = './pretrained/k_Conv04_epoch' + str(epoch_) + '_optimizer' + '.pth.tar'
+    save_name_model = './pretrained/k_Conv05_epoch' + str(epoch_) + '_model' + '.pth.tar'
+    save_name_optimizer = './pretrained/k_Conv05_epoch' + str(epoch_) + '_optimizer' + '.pth.tar'
     torch.save(autoencoder.state_dict(), save_name_model)
     torch.save(optimizer.state_dict(), save_name_optimizer)
 #    scheduler.step()
