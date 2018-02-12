@@ -53,14 +53,14 @@ def cal_test_mse_psnr(test_file_num, BATCH_SIZE):
         data_input, _ = test_input_iter.next()
         data_output, _ = test_output_iter.next()
         data_input = data_input.type(torch.FloatTensor)
-        ta_output = data_output.type(torch.FloatTensor)
+        data_output = data_output.type(torch.FloatTensor)
 
         x = Variable(data_input.cuda())
-        y = Variable((data_input-data_output).cuda())
+        y = Variable(data_output.cuda())
 
         test_denoise = autoencoder(x)
 
-        mse = loss_func(test_denoise, y).data[0]
+        mse = loss_func(x-test_denoise, y).data[0]
         loss += mse
         psnr = -10 * math.log10(mse)
         avg_psnr += psnr
@@ -186,7 +186,7 @@ print("loading complete")
 
 
 # show image
-f, a = plt.subplots(3, N_TEST_IMG, figsize=(5,3))
+f, a = plt.subplots(3, N_TEST_IMG, figsize=(10,6))
 plt.ion()
 
 for i in range(N_TEST_IMG):
@@ -223,7 +223,7 @@ for epoch in range(EPOCH):
         loss.backward()
         optimizer.step()
         
-#        loss = loss_func(x - decoded, data_output_variable)
+        loss = loss_func(x - decoded, data_output_variable)
         train_loss_sum += loss.data[0]
 
 #        if True:
@@ -232,18 +232,21 @@ for epoch in range(EPOCH):
             print("Epoch :", epoch, "| step :",step,"| train loss: %0.6f" % loss.data[0])
             
             decoded_data = autoencoder(view_data_in)
+            
+            final_image = view_data_in.data.cpu().numpy() - decoded_data.data.cpu().numpy()            
+
             for i in range(N_TEST_IMG):
                 a[2][i].clear()
-                a[2][i].imshow((view_data_in.data.cpu().numpy()[i]-decoded_data.data.cpu().numpy()[i]).reshape(512,350), cmap='gray')
+                a[2][i].imshow(final_image[i].reshape(512,350), cmap='gray')
                 a[2][i].set_xticks(())
                 a[2][i].set_yticks(())
             plt.draw()
-            plt.pause(0.05)
+            plt.pause(0.5)
 
         #aaa = input("Press ctrl+c:")
         
     epoch_ = epoch + 0 + 1
-
+    """
 # save data
     save_name_model = './pretrained/y_Conv02_epoch' + str(epoch_) + '_model' + '.pth.tar'
     save_name_optimizer = './pretrained/y_Conv02_epoch' + str(epoch_) + '_optimizer' + '.pth.tar'
@@ -251,7 +254,7 @@ for epoch in range(EPOCH):
     torch.save(optimizer.state_dict(), save_name_optimizer)
 #    scheduler.step()
     print("model saved")
-    
+    """    
     train_error.append(train_loss_sum * BATCH_SIZE / train_file_num) # approximate
     test_loss_output, test_avg_psnr_output = cal_test_mse_psnr(test_file_num, 8)
     test_error.append(test_loss_output)
