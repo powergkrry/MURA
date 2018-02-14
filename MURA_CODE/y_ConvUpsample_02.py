@@ -65,6 +65,19 @@ def cal_test_mse_psnr(test_file_num, BATCH_SIZE):
         psnr = -10 * math.log10(mse)
         avg_psnr += psnr
 
+        """
+        if i == 0:
+            f, a = plt.subplots(3, N_TEST_IMG, figsize=(10, 6))
+            for j in range(N_TEST_IMG):
+                a[0][j].imshow(x.data.cpu().numpy()[j].reshape(512, 350), cmap='gray')
+                a[0][j].set_xticks(());a[0][j].set_yticks(())
+                a[1][j].imshow(y.data.cpu().numpy()[j].reshape(512, 350), cmap='gray')
+                a[1][j].set_xticks(());a[1][j].set_yticks(())
+                a[2][j].imshow((x-test_denoise).data.cpu().numpy()[j].reshape(512, 350), cmap='gray')
+                a[2][j].set_xticks(());a[2][j].set_yticks(())
+        plt.show()
+        """
+
     test_loss_output = loss / int(test_file_num / BATCH_SIZE) # approximate
     test_avg_psnr_output = avg_psnr / int(test_file_num / BATCH_SIZE) # approximate
 
@@ -72,7 +85,7 @@ def cal_test_mse_psnr(test_file_num, BATCH_SIZE):
 
 
 trans_comp = transforms.Compose([
-        transforms.CenterCrop(100),
+        #transforms.CenterCrop(100),
         transforms.ToTensor()
     ])
 
@@ -82,7 +95,7 @@ torch.cuda.manual_seed_all(1) # for multi gpu
 np.random.seed(1)
 random.seed(1)
 
-EPOCH = 20 
+EPOCH = 30 
 BATCH_SIZE = 16
 LR1 = 0.001     # learning rate
 LR2 = 0.0001
@@ -126,10 +139,10 @@ class AutoEncoder(nn.Module):
  
 print("generating autoencoder")
 autoencoder = AutoEncoder()
-#autoencoder = torch.nn.DataParallel(autoencoder, device_ids = [0, 1])
+autoencoder = torch.nn.DataParallel(autoencoder, device_ids = [0, 1])
 autoencoder.cuda()
 
-optimizer = torch.optim.Adam(autoencoder.parameters(), lr=LR1, weight_decay=1e-5)
+optimizer = torch.optim.Adam(autoencoder.parameters(), lr=LR2, weight_decay=1e-5)
 #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=14, gamma=0.1)
 
 """
@@ -184,7 +197,7 @@ test_loader_output = torch.utils.data.DataLoader(
     folder_test_output, batch_size = 8, shuffle = False)
 print("loading complete")
 
-
+"""
 # show image
 f, a = plt.subplots(3, N_TEST_IMG, figsize=(10,6))
 plt.ion()
@@ -196,6 +209,7 @@ for i in range(N_TEST_IMG):
     a[1][i].imshow(view_data_out.data.cpu().numpy()[i].reshape(512,350), cmap='gray')
     a[1][i].set_xticks(())
     a[1][i].set_yticks(())
+"""
 
 for epoch in range(EPOCH):
     train_input_iter = iter(train_loader_input)
@@ -234,7 +248,8 @@ for epoch in range(EPOCH):
             decoded_data = autoencoder(view_data_in)
             
             final_image = view_data_in.data.cpu().numpy() - decoded_data.data.cpu().numpy()            
-
+            
+            """
             for i in range(N_TEST_IMG):
                 a[2][i].clear()
                 a[2][i].imshow(final_image[i].reshape(512,350), cmap='gray')
@@ -242,11 +257,12 @@ for epoch in range(EPOCH):
                 a[2][i].set_yticks(())
             plt.draw()
             plt.pause(0.5)
-
+            """
+            
         #aaa = input("Press ctrl+c:")
         
     epoch_ = epoch + 0 + 1
-    """
+
 # save data
     save_name_model = './pretrained/y_Conv02_epoch' + str(epoch_) + '_model' + '.pth.tar'
     save_name_optimizer = './pretrained/y_Conv02_epoch' + str(epoch_) + '_optimizer' + '.pth.tar'
@@ -254,7 +270,7 @@ for epoch in range(EPOCH):
     torch.save(optimizer.state_dict(), save_name_optimizer)
 #    scheduler.step()
     print("model saved")
-    """    
+
     train_error.append(train_loss_sum * BATCH_SIZE / train_file_num) # approximate
     test_loss_output, test_avg_psnr_output = cal_test_mse_psnr(test_file_num, 8)
     test_error.append(test_loss_output)
@@ -264,7 +280,7 @@ for epoch in range(EPOCH):
     print(train_error)
     print("\ntest_error")
     print(test_error)
-    print("\ntest_pnsr\n")
+    print("\ntest_pnsr")
     print(test_psnr)
 
 
@@ -302,3 +318,7 @@ for i in range(len(test_input_iter)):
         a[2][i].set_yticks(())
     plt.show()
 """
+
+plt.figure
+plt.plot(test_psnr)
+plt.savefig("./y_ConvUpsample_02_test_psnr.png")
