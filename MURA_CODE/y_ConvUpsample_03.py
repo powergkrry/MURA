@@ -56,11 +56,11 @@ def cal_test_mse_psnr(test_file_num, BATCH_SIZE):
         data_output = data_output.type(torch.FloatTensor)
 
         x = Variable(data_input.cuda())
-        y = Variable(data_output.cuda())
+        y = Variable((data_input-data_output).cuda())
 
         test_denoise = autoencoder(x)
 
-        mse = loss_func(x-test_denoise, y).data[0]
+        mse = loss_func(test_denoise, y).data[0]
         loss += mse
         psnr = -10 * math.log10(mse)
         avg_psnr += psnr
@@ -103,6 +103,7 @@ LR3 = 0.00001
 N_TEST_IMG = 5
 train_error = []
 test_error = []
+train_psnr = []
 test_psnr = []
 
 dir_input = '/home/powergkrry/MURA/MURA_TRAIN_RESIZE_NOISE/'
@@ -220,6 +221,7 @@ for epoch in range(EPOCH):
         break
 
     train_loss_sum = 0
+    train_psnr_sum = 0
 
     for step in range(len(train_input_iter)):
         data_input, _ = train_input_iter.next()
@@ -229,7 +231,6 @@ for epoch in range(EPOCH):
 
         x = Variable(data_input.cuda())
         y = Variable((data_input-data_output).cuda())
-        data_output_variable = Variable(data_output.cuda())
         decoded = autoencoder(x) # delete encoded,
 
         loss = loss_func(decoded, y)
@@ -237,8 +238,9 @@ for epoch in range(EPOCH):
         loss.backward()
         optimizer.step()
         
-        loss = loss_func(x - decoded, data_output_variable)
         train_loss_sum += loss.data[0]
+        psnr = -10 * math.log10(loss.data[0])
+        train_psnr_sum += psnr
 
 #        if True:
         if step % 400 == 0:
@@ -263,6 +265,7 @@ for epoch in range(EPOCH):
         
     epoch_ = epoch + 0 + 1
 
+    """
 # save data
     save_name_model = './pretrained/y_Conv02_epoch' + str(epoch_) + '_model' + '.pth.tar'
     save_name_optimizer = './pretrained/y_Conv02_epoch' + str(epoch_) + '_optimizer' + '.pth.tar'
@@ -270,8 +273,10 @@ for epoch in range(EPOCH):
     torch.save(optimizer.state_dict(), save_name_optimizer)
 #    scheduler.step()
     print("model saved")
+    """
 
     train_error.append(train_loss_sum * BATCH_SIZE / train_file_num) # approximate
+    train_psnr.append(train_psnr_sum * BATCH_SIZE / train_file_num) # approximate
     test_loss_output, test_avg_psnr_output = cal_test_mse_psnr(test_file_num, 8)
     test_error.append(test_loss_output)
     test_psnr.append(test_avg_psnr_output)
@@ -280,6 +285,8 @@ for epoch in range(EPOCH):
     print(train_error)
     print("\ntest_error")
     print(test_error)
+    print("\ntrain_psnr")
+    print(train_psnr)
     print("\ntest_pnsr")
     print(test_psnr)
 
