@@ -10,7 +10,7 @@ It says, there is a slight relation between the hidden unit count and the learni
 When we increase the hidden unit count, we obtain a more heavily parametrised model with a higher capacity.
 And with that model, it is more possible to be overfitted on the same training set.
 In addition, this model has a more complex error surface compared to a thinner model.
-So, if we apply large learning rate to depp network, error will digerges or converge to a weird results.
+So, if we apply large learning rate to deep network, error will diverges or converge to a weird results.
 
 < conclusion >
 So it is logical that smaller learning rate is needed to deep network.
