@@ -326,6 +326,11 @@ for i in range(len(test_input_iter)):
     plt.show()
 """
 
-plt.figure
-plt.plot(test_psnr)
-plt.savefig("./y_Results/y_ConvUpsample_02_test_psnr.png")
+fig = plt.figure(figsize=(12, 6))
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+ax1.set_title("train psnr")
+ax2.set_title("test psnr")
+ax1.plot(train_psnr)
+ax2.plot(test_psnr)
+plt.savefig("./y_Results/y_ConvUpsample_02_01.png")

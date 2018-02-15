@@ -1,0 +1,16 @@
+Should I reduce learning rate as a network grows?
+
+< objective >
+We observed that the deeper the network, we need smaller learning rate to converge.
+So we wondered that is there a connection betweem depth of network and learning rate.
+
+< trials >
+We got a fine answer in google.
+It says, there is a slight relation between the hidden unit count and the learning rate.
+When we increase the hidden unit count, we obtain a more heavily parametrised model with a higher capacity.
+And with that model, it is more possible to be overfitted on the same training set.
+In addition, this model has a more complex error surface compared to a thinner model.
+So, if we apply large learning rate to depp network, error will digerges or converge to a weird results.
+
+< conclusion >
+So it is logical that smaller learning rate is needed to deep network.
