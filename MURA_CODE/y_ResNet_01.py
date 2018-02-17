@@ -120,15 +120,18 @@ class AutoEncoder(nn.Module):
         self.ReLU = nn.ReLU()
 
     def forward(self, x):
-        x = self.ReLU(self.conv1(x))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.conv3(x)
-        return x
+        residual = x
+        out = self.ReLU(self.bn1(self.conv1(x)))
+        out = self.ReLU(self.bn1(self.conv2(out)))
+        out = self.ReLU(self.bn1(self.conv2(out)))
+        out = self.ReLU(self.bn1(self.conv2(out)))
+        out = self.ReLU(self.bn1(self.conv2(out)))
+        out = self.ReLU(self.bn1(self.conv2(out)))
+        out = self.ReLU(self.bn1(self.conv2(out)))
+        out = self.conv3(out)
+        out += residual
+        out = self.ReLU(out)
+        return out
 
  
 print("generating autoencoder")
@@ -256,7 +259,6 @@ for epoch in range(EPOCH):
         
     epoch_ = epoch + 0 + 1
 
-    """
 # save data
     save_name_model = './pretrained/y_Conv02_epoch' + str(epoch_) + '_model' + '.pth.tar'
     save_name_optimizer = './pretrained/y_Conv02_epoch' + str(epoch_) + '_optimizer' + '.pth.tar'
@@ -264,7 +266,6 @@ for epoch in range(EPOCH):
     torch.save(optimizer.state_dict(), save_name_optimizer)
 #    scheduler.step()
     print("model saved")
-    """
 
     train_error.append(train_loss_sum * BATCH_SIZE / train_file_num) # approximate
     train_psnr.append(train_psnr_sum * BATCH_SIZE / train_file_num) # approximate

@@ -1,0 +1,8 @@
+y_ConvUpsample_03
+01 : input dataset exists, 350x512 image
+02 : input dataset not exists, 100x100 image, LR = 0.001, batchsize = 16
+03 : input dataset not exists, 100x100 image, LR = 0.0001, batchsize = 16
+04 : input dataset not exists, 100x100 image, LR = 0.00001, batchsize = 16
+05 : input dataset not exists, 100x100 image, LR = 0.000001, batchsize = 16
+06 : input dataset not exists, 100x100 image, LR = 0.0000001, batchsize = 16
+07 : input dataset not exists, 100x100 image, LR = 0.000005, batchsize = 64
