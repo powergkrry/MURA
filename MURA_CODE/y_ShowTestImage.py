@@ -22,15 +22,18 @@ class AutoEncoder(nn.Module):
         self.ReLU = nn.ReLU()
 
     def forward(self, x):
-        x = self.ReLU(self.conv1(x))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.ReLU(self.bn1(self.conv2(x)))
-        x = self.conv3(x)
-        return x
+        residual = x
+        out = self.ReLU(self.bn1(self.conv1(x)))
+        out = self.ReLU(self.bn1(self.conv2(out)))
+        out = self.ReLU(self.bn1(self.conv2(out)))
+        out = self.ReLU(self.bn1(self.conv2(out)))
+        out = self.ReLU(self.bn1(self.conv2(out)))
+        out = self.ReLU(self.bn1(self.conv2(out)))
+        out = self.ReLU(self.bn1(self.conv2(out)))
+        out = self.conv3(out)
+        out += residual
+        out = self.ReLU(out)
+        return out
 
 LR2 = 0.0001
 N_TEST_IMG = 5

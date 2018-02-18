@@ -110,7 +110,6 @@ namelist_test = os.listdir('/home/powergkrry/MURA/MURA_TEST_RESIZE_NOISE/test/')
 train_file_num = len(namelist_clean)
 test_file_num = len(namelist_test)
 
-"""
 class AutoEncoder(nn.Module):
     def __init__(self):
         super(AutoEncoder, self).__init__()
@@ -134,11 +133,9 @@ class AutoEncoder(nn.Module):
         out += residual
         out = self.ReLU(out)
         return out
-"""
  
 print("generating autoencoder")
-#autoencoder = AutoEncoder()
-autoencoder = resnet2.resnet18()
+autoencoder = AutoEncoder()
 autoencoder = torch.nn.DataParallel(autoencoder, device_ids = [0, 1])
 autoencoder.cuda()
 
