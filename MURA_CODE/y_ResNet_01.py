@@ -21,7 +21,7 @@ check :
 3. load pretrained model, optimizer
 """
 """
-This model is DnCNN-like model.
+This model is using modified ResNet.
 """
 
 def img_to_tensorVariable(dir_path, name_list, num_img_from, num_img_to):

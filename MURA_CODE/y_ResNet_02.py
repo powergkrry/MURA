@@ -11,8 +11,8 @@ from torchvision.transforms import ToTensor, ToPILImage
 import folder2
 import random
 import math
-import cv2
 import resnet2
+from logger import Logger
 
 """
 check :
@@ -55,7 +55,7 @@ def cal_test_mse_psnr(test_file_num, BATCH_SIZE):
         data_input = data_input.type(torch.FloatTensor)
 
         x = Variable(data_input.cuda())
-        y = Variable((data_input-data_clean).cuda())
+        y = Variable(data_clean.cuda())
 
         test_denoise = autoencoder(x)
 
@@ -64,10 +64,13 @@ def cal_test_mse_psnr(test_file_num, BATCH_SIZE):
         psnr = -10 * math.log10(mse)
         avg_psnr += psnr
 
+        if i == 0:
+            first_batch = x
+
     test_loss_output = loss / int(test_file_num / BATCH_SIZE) # approximate
     test_avg_psnr_output = avg_psnr / int(test_file_num / BATCH_SIZE) # approximate
 
-    return test_loss_output, test_avg_psnr_output
+    return test_loss_output, test_avg_psnr_output, first_batch
 
 def add_gaussian_noise(image_in, noise_sigma):
 
@@ -92,6 +95,7 @@ random.seed(1)
 
 EPOCH = 30 
 BATCH_SIZE = 64
+test_BATCH_SIZE = 8
 LR1 = 0.001     # learning rate
 LR2 = 0.0001
 LR3 = 0.00001
@@ -177,7 +181,7 @@ folder_test_clean = folder2.ImageFolder(
     loader = folder2.pil_loader
 )
 test_loader_clean = torch.utils.data.DataLoader(
-    folder_test_clean, batch_size = 8, shuffle = False)
+    folder_test_clean, batch_size = test_BATCH_SIZE, shuffle = False)
 print("loading complete")
 
 print("making noise")
@@ -203,6 +207,7 @@ for i in range(N_TEST_IMG):
     a[1][i].set_xticks(())
     a[1][i].set_yticks(())
 """
+logger = Logger('./logs')
 
 for epoch in range(EPOCH):
     train_clean_iter = iter(train_loader_clean)
@@ -220,7 +225,7 @@ for epoch in range(EPOCH):
         data_clean = data_clean.type(torch.FloatTensor)
 
         x = Variable(data_input.cuda())
-        y = Variable((data_input-data_clean).cuda())
+        y = Variable(data_clean.cuda())
         decoded = autoencoder(x) # delete encoded,
         
         loss = loss_func(decoded, y)
@@ -233,11 +238,12 @@ for epoch in range(EPOCH):
         train_psnr_sum += psnr
 
 #        if True:
-        if step % 400 == 0:
+        if (step+1) % 100 == 0:
 #            break
             print("Epoch :", epoch, "| step :",step,"| train loss: %0.6f" % loss.data[0])
             
             """
+            #show images
             final_image = x.data.cpu().numpy() - decoded.data.cpu().numpy()            
             
             f, a = plt.subplots(3, N_TEST_IMG, figsize=(7,7))
@@ -259,8 +265,27 @@ for epoch in range(EPOCH):
             plt.show()
             """
 
-        #aaa = input("Press ctrl+c:")
-        
+            #TensorBoard logging
+         
+        if step == 0:  
+            """ 
+            #(1) Log the scalar values
+            logger.scalar_summary('loss', loss.data[0], epoch+1)
+
+            #(2) Log values and gadients of the parameters (histogram)
+            for tag, value in autoencoder.named_parameters():
+                tag = tag.replace('.', '/')
+                logger.histo_summary(tag, value.data.cpu().numpy(), epoch+1)
+                logger.histo_summary(tag+'/grad', value.grad.data.cpu().numpy(), epoch+1)
+            """
+            #(3) Log the images
+            info = {
+                'train_images': decoded.view(-1, 100, 100)[:8].data.cpu().numpy()
+            }
+
+            for tag, images in info.items():
+                logger.image_summary(tag, images, epoch+1)
+
     epoch_ = epoch + 0 + 1
 
 # save data
@@ -271,11 +296,24 @@ for epoch in range(EPOCH):
 #    scheduler.step()
     print("model saved")
 
-    train_error.append(train_loss_sum * BATCH_SIZE / train_file_num) # approximate
-    train_psnr.append(train_psnr_sum * BATCH_SIZE / train_file_num) # approximate
-    test_loss_output, test_avg_psnr_output = cal_test_mse_psnr(test_file_num, 8)
+    this_train_err = train_loss_sum * BATCH_SIZE / train_file_num
+    train_error.append(this_train_err) # approximate
+    this_train_psnr = train_psnr_sum * BATCH_SIZE / train_file_num
+    train_psnr.append(this_train_psnr) # approximate
+    test_loss_output, test_avg_psnr_output, first_batch = cal_test_mse_psnr(test_file_num, test_BATCH_SIZE)
     test_error.append(test_loss_output)
     test_psnr.append(test_avg_psnr_output)
+
+    logger.scalar_summary('train_loss', this_train_err, epoch+1)
+    logger.scalar_summary('test_loss', test_loss_output, epoch+1)
+    logger.scalar_summary('train_psnr', this_train_psnr, epoch+1)
+    logger.scalar_summary('test_psnr', test_avg_psnr_output, epoch+1)
+
+    info = {
+        'test_images': first_batch.view(-1, 100, 100)[:8].data.cpu().numpy()
+    }
+    for tag, images in info.items():
+        logger.image_summary(tag, images, epoch+1)
 
     print("\ntrain_error")
     print(train_error)
@@ -331,3 +369,4 @@ ax1.plot(train_psnr)
 ax2.plot(test_psnr)
 plt.savefig("./y_Results/y_ConvUpsample_02_01.png")
 """
+

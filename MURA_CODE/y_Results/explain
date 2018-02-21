@@ -8,6 +8,5 @@ y_ConvUpsample_03
 07 : input dataset not exists, 100x100 image, LR = 0.000005, batchsize = 64
 
 y_ResNet_01 : modified ResNet (for image -> image)
-01 : 100x100 image (cropped), LR = 0.0001->0.00001->0.000001, batchsize = 64
 
 y_ResNet_02 : Convolution + residual learning

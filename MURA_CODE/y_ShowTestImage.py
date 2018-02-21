@@ -46,8 +46,8 @@ autoencoder = torch.nn.DataParallel(autoencoder, device_ids = [0, 1])
 autoencoder.cuda()
 optimizer = torch.optim.Adam(autoencoder.parameters(), lr=LR2, weight_decay=1e-5)
 
-autoencoder.load_state_dict(torch.load('./pretrained/y_Conv02_epoch30_model.pth.tar'))
-optimizer.load_state_dict(torch.load('./pretrained/y_Conv02_epoch30_optimizer.pth.tar'))
+autoencoder.load_state_dict(torch.load('./pretrained/y_ResNet01_epoch20_model.pth.tar'))
+optimizer.load_state_dict(torch.load('./pretrained/y_ResNet01_epoch20_optimizer.pth.tar'))
 
 
 print("loading test_loader")
@@ -81,7 +81,7 @@ for i in range(len(test_input_iter)):
     x = Variable(data_input.cuda())
     y = Variable(data_output.cuda())
 
-    test_denoise = autoencoder(x)
+    test_denoise = autoencoder(y)
 
     f, a = plt.subplots(3, N_TEST_IMG, figsize=(10, 6))
 
@@ -96,7 +96,7 @@ for i in range(len(test_input_iter)):
         a[1][i].set_yticks(())
 
     for i in range(N_TEST_IMG):
-        a[2][i].imshow((x.data.cpu().numpy()-test_denoise.data.cpu().numpy())[i].reshape(512,350), cmap='gray')
+        a[2][i].imshow(test_denoise.data.cpu().numpy()[i].reshape(512,350), cmap='gray')
         a[2][i].set_xticks(())
         a[2][i].set_yticks(())
     plt.show()
