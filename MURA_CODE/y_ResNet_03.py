@@ -65,7 +65,7 @@ def cal_test_mse_psnr(test_file_num, BATCH_SIZE):
         avg_psnr += psnr
 
         if i == 0:
-            first_batch = x
+            first_batch = test_denoise
 
     test_loss_output = loss / int(test_file_num / BATCH_SIZE) # approximate
     test_avg_psnr_output = avg_psnr / int(test_file_num / BATCH_SIZE) # approximate
@@ -114,6 +114,7 @@ namelist_test = os.listdir('/home/powergkrry/MURA/MURA_TEST_RESIZE_NOISE/test/')
 train_file_num = len(namelist_clean)
 test_file_num = len(namelist_test)
 
+"""
 class AutoEncoder(nn.Module):
     def __init__(self):
         super(AutoEncoder, self).__init__()
@@ -137,9 +138,11 @@ class AutoEncoder(nn.Module):
         out += residual
         out = self.ReLU(out)
         return out
- 
+"""
+
 print("generating autoencoder")
-autoencoder = AutoEncoder()
+#autoencoder = AutoEncoder()
+autoencoder = resnet2.resnet34()
 autoencoder = torch.nn.DataParallel(autoencoder, device_ids = [0, 1])
 autoencoder.cuda()
 
@@ -280,7 +283,7 @@ for epoch in range(EPOCH):
             """
             #(3) Log the images
             info = {
-                'train_images': decoded.view(-1, 100, 100)[:8].data.cpu().numpy()
+                'train_images': decoded.view(-1, 100, 100).data.cpu().numpy()
             }
 
             for tag, images in info.items():
