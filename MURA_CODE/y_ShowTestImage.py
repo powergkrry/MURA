@@ -12,7 +12,6 @@ from torchvision import transforms
 import folder2
 import resnet2
 
-"""
 class AutoEncoder(nn.Module):
     def __init__(self):
         super(AutoEncoder, self).__init__()
@@ -36,7 +35,6 @@ class AutoEncoder(nn.Module):
         out += residual
         out = self.ReLU(out)
         return out
-"""
 
 LR2 = 0.0001
 N_TEST_IMG = 5
@@ -44,7 +42,7 @@ N_TEST_IMG = 5
 dir_test_input = '/home/powergkrry/MURA/MURA_TEST_RESIZE_NOISE/'
 dir_test_output = '/home/powergkrry/MURA/MURA_TEST_RESIZE/'
 
-autoencoder = resnet2.resnet34()
+autoencoder = AutoEncoder()
 autoencoder = torch.nn.DataParallel(autoencoder, device_ids = [0, 1])
 autoencoder.cuda()
 optimizer = torch.optim.Adam(autoencoder.parameters(), lr=LR2, weight_decay=1e-5)

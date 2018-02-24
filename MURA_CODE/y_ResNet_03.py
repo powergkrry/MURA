@@ -13,6 +13,7 @@ import random
 import math
 import resnet2
 from logger import Logger
+import y_Augmentation
 
 """
 check :
@@ -83,8 +84,10 @@ def add_gaussian_noise(image_in, noise_sigma):
     return noisy_image
 
 trans_comp = transforms.Compose([
-        transforms.CenterCrop(100),
-        transforms.ToTensor()
+        #transforms.CenterCrop(100),
+        #transforms.ToTensor()
+        y_Augmentation.FullCrop((32, 35)),
+        transforms.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops]))
     ])
 
 torch.manual_seed(1)    # reproducible
@@ -114,7 +117,6 @@ namelist_test = os.listdir('/home/powergkrry/MURA/MURA_TEST_RESIZE_NOISE/test/')
 train_file_num = len(namelist_clean)
 test_file_num = len(namelist_test)
 
-"""
 class AutoEncoder(nn.Module):
     def __init__(self):
         super(AutoEncoder, self).__init__()
@@ -138,11 +140,10 @@ class AutoEncoder(nn.Module):
         out += residual
         out = self.ReLU(out)
         return out
-"""
 
 print("generating autoencoder")
-#autoencoder = AutoEncoder()
-autoencoder = resnet2.resnet34()
+autoencoder = AutoEncoder()
+#autoencoder = resnet2.resnet34()
 autoencoder = torch.nn.DataParallel(autoencoder, device_ids = [0, 1])
 autoencoder.cuda()
 

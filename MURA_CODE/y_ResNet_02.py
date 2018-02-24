@@ -189,7 +189,7 @@ train_iter = iter(train_loader_clean)
 train_input = []
 for step in range(len(train_iter)):
     data_clean, _ = train_iter.next()
-    data_noise = add_gaussian_noise(data_clean, 20)
+    data_noise = add_gaussian_noise(data_clean, 10)
     train_input.append(data_noise.type(torch.FloatTensor))
 
 print("make noise complete")
@@ -315,6 +315,7 @@ for epoch in range(EPOCH):
     for tag, images in info.items():
         logger.image_summary(tag, images, epoch+1)
 
+    """
     print("\ntrain_error")
     print(train_error)
     print("\ntest_error")
@@ -322,6 +323,7 @@ for epoch in range(EPOCH):
     print("\ntrain_psnr =",train_psnr)
     print("\ntest_psnr =", test_psnr)
 
+    """
 
 """
 # Plot Test Image
