@@ -84,10 +84,10 @@ def add_gaussian_noise(image_in, noise_sigma):
     return noisy_image
 
 trans_comp = transforms.Compose([
-        #transforms.CenterCrop(100),
-        #transforms.ToTensor()
-        y_Augmentation.FullCrop((32, 35)),
-        transforms.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops]))
+        transforms.CenterCrop(100),
+        transforms.ToTensor()
+        #y_Augmentation.FullCrop((32, 35)),
+        #transforms.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops]))
     ])
 
 torch.manual_seed(1)    # reproducible
