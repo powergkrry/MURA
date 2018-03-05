@@ -85,9 +85,10 @@ def add_gaussian_noise(image_in, noise_sigma):
 
 trans_comp = transforms.Compose([
         #transforms.CenterCrop(100),
-        #transforms.ToTensor()
+        #transforms.ToTensor(),
         y_Augmentation.FullCrop((32, 35)),
-        transforms.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops]))
+        transforms.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops])),
+        transforms.Normalize(mean=[0.485], std=[0.229])
     ])
 
 torch.manual_seed(1)    # reproducible
@@ -97,7 +98,7 @@ np.random.seed(1)
 random.seed(1)
 
 EPOCH = 30 
-BATCH_SIZE = 64
+BATCH_SIZE = 1  # 64
 test_BATCH_SIZE = 8
 LR1 = 0.001     # learning rate
 LR2 = 0.0001
@@ -195,6 +196,8 @@ for step in range(len(train_iter)):
     data_clean, _ = train_iter.next()
     data_noise = add_gaussian_noise(data_clean, 20)
     train_input.append(data_noise.type(torch.FloatTensor))
+    if step == 1000:
+        break
 
 print("make noise complete")
 
@@ -228,7 +231,7 @@ for epoch in range(EPOCH):
         data_input = train_input[step]
         data_clean = data_clean.type(torch.FloatTensor)
 
-        x = Variable(data_input.cuda())
+        x = Variable(data_input.view(-1, 1, 32, 35).cuda())
         y = Variable(data_clean.cuda())
         decoded = autoencoder(x) # delete encoded,
         
@@ -245,6 +248,8 @@ for epoch in range(EPOCH):
         if (step+1) % 100 == 0:
 #            break
             print("Epoch :", epoch, "| step :",step,"| train loss: %0.6f" % loss.data[0])
+        if step == 1000:
+            break
             
             """
             #show images
@@ -284,7 +289,7 @@ for epoch in range(EPOCH):
             """
             #(3) Log the images
             info = {
-                'train_images': decoded.view(-1, 100, 100).data.cpu().numpy()
+                'train_images': decoded.view(-1, 32, 35).data.cpu().numpy()
             }
 
             for tag, images in info.items():
@@ -293,8 +298,8 @@ for epoch in range(EPOCH):
     epoch_ = epoch + 0 + 1
 
 # save data
-    save_name_model = './pretrained/y_ResNet01_epoch' + str(epoch_) + '_model' + '.pth.tar'
-    save_name_optimizer = './pretrained/y_ResNet01_epoch' + str(epoch_) + '_optimizer' + '.pth.tar'
+    save_name_model = './pretrained/y_ResNet03_epoch' + str(epoch_) + '_model' + '.pth.tar'
+    save_name_optimizer = './pretrained/y_ResNet03_epoch' + str(epoch_) + '_optimizer' + '.pth.tar'
     torch.save(autoencoder.state_dict(), save_name_model)
     torch.save(optimizer.state_dict(), save_name_optimizer)
 #    scheduler.step()

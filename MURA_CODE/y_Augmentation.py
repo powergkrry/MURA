@@ -80,7 +80,7 @@ if __name__ == '__main__':
     f, a = plt.subplots(16, 10, figsize=(32,35))
     for i in range(16):
         for j in range(10):
-            a[i][j].imshow(img.numpy()[0][i*10+j].reshape(32, 35))
+            a[i][j].imshow(img.numpy()[0][i*10+j].reshape(32, 35), cmap='gray')
             a[i][j].set_xticks(()) 
             a[i][j].set_yticks(())
 
@@ -88,5 +88,5 @@ if __name__ == '__main__':
 
     print(img2.shape)
 
-    plt.imshow(img2.numpy()[0][0])
+    plt.imshow(img2.numpy()[0][0], cmap='gray')
     plt.show()
