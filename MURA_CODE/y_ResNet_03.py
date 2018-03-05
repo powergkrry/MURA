@@ -89,6 +89,10 @@ trans_comp = transforms.Compose([
         y_Augmentation.FullCrop((32, 35)),
         transforms.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops])),
         transforms.Normalize(mean=[0.485], std=[0.229])
+        transforms.CenterCrop(100),
+        transforms.ToTensor()
+        #y_Augmentation.FullCrop((32, 35)),
+        #transforms.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops]))
     ])
 
 torch.manual_seed(1)    # reproducible
